@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Student {
     private int id;
@@ -34,10 +36,31 @@ public class Student {
     }
 
     public List<Double> getGrades() {
-        return grades;
+        return Collections.unmodifiableList(grades);
     }
 
     public List<Course> getCourses() {
-        return courses;
+        return Collections.unmodifiableList(courses);
+    }
+
+    public void addGrade(double grade) {
+        grades.add(grade);
+    }
+
+    public void addCourse(Course course) {
+        courses.add(course);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Student student = (Student) obj;
+        return id == student.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

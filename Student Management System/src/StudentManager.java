@@ -2,8 +2,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalDouble;
+import java.util.regex.Pattern;
 
 public class StudentManager {
+    private static final Pattern VALID_EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private List<Student> students = new ArrayList<>();
 
@@ -11,6 +13,8 @@ public class StudentManager {
     public boolean addStudent(Student student) {
         if (student == null) return false;
         if (student.getId() <= 0) return false;
+        if (student.getName() == null || student.getName().trim().isEmpty()) return false;
+        if (!isValidEmail(student.getEmail())) return false;
         if (student.getYearLevel() <= 0) return false;
         if (findStudent(student.getId()) != null) {
             return false;
@@ -56,7 +60,7 @@ public class StudentManager {
         if (grade < 0.0 || grade > 100.0) return false;
         Student student = findStudent(studentId);
         if(student != null){
-            student.getGrades().add(grade);
+            student.addGrade(grade);
             return true;
         }
         return false;
@@ -79,9 +83,16 @@ public class StudentManager {
     public boolean addCourseToStudent(int studentId, Course course){
         if (course == null) return false;
         if (course.getCourseId() <= 0) return false;
+        if (course.getCourseName() == null || course.getCourseName().trim().isEmpty()) return false;
+        if (course.getInstructor() == null || course.getInstructor().trim().isEmpty()) return false;
         Student student = findStudent(studentId);
         if(student != null){
-            student.getCourses().add(course);
+            for (Course existing : student.getCourses()) {
+                if (existing.getCourseId() == course.getCourseId()) {
+                    return false;
+                }
+            }
+            student.addCourse(course);
             return true;
         }
         return false;
@@ -94,5 +105,9 @@ public class StudentManager {
             return Collections.unmodifiableList(student.getCourses());
         }
         return Collections.emptyList();
+    }
+
+    private static boolean isValidEmail(String email) {
+        return email != null && !email.trim().isEmpty() && VALID_EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 }

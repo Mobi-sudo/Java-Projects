@@ -15,6 +15,11 @@ public class TestRunner {
     private static void runAllTests() {
         testAddStudentNormal();
         testAddStudentDuplicate();
+        testAddStudentInvalidName();
+        testAddStudentInvalidEmail();
+        testAddStudentInvalidEmailPattern();
+        testAddStudentInvalidYear();
+        testStudentEqualityById();
         testFindStudentNotFound();
         testDisplayAllStudentsEmpty();
         testDisplayAllStudentsNonEmpty();
@@ -26,7 +31,9 @@ public class TestRunner {
         testCalculateAverageNoGrades();
         testAddCourseToStudentNormal();
         testAddCourseToStudentMissing();
+        testAddDuplicateCourseRejected();
         testViewCoursesEmpty();
+        testReadOnlyListProtection();
         testInteractionFlow();
     }
 
@@ -50,6 +57,37 @@ public class TestRunner {
         boolean a1 = mgr.addStudent(new Student(11, "A", "a@x.com", 2));
         boolean a2 = mgr.addStudent(new Student(11, "B", "b@x.com", 3));
         assertTrue(a1 && !a2, "Duplicate ID rejected");
+    }
+
+    private static void testAddStudentInvalidName() {
+        StudentManager mgr = new StudentManager();
+        boolean ok = mgr.addStudent(new Student(12, "   ", "n@x.com", 1));
+        assertTrue(!ok, "Blank student name rejected");
+    }
+
+    private static void testAddStudentInvalidEmail() {
+        StudentManager mgr = new StudentManager();
+        boolean ok = mgr.addStudent(new Student(13, "N", "bad-email", 1));
+        assertTrue(!ok, "Email missing '@' rejected");
+    }
+
+    private static void testAddStudentInvalidEmailPattern() {
+        StudentManager mgr = new StudentManager();
+        boolean invalid1 = mgr.addStudent(new Student(15, "N", "name@domain", 1));
+        boolean invalid2 = mgr.addStudent(new Student(16, "N", "name@.com", 1));
+        assertTrue(!invalid1 && !invalid2, "Malformed email patterns rejected");
+    }
+
+    private static void testAddStudentInvalidYear() {
+        StudentManager mgr = new StudentManager();
+        boolean ok = mgr.addStudent(new Student(14, "N", "n@x.com", 0));
+        assertTrue(!ok, "Non-positive year level rejected");
+    }
+
+    private static void testStudentEqualityById() {
+        Student a = new Student(17, "Match", "m@x.com", 2);
+        Student b = new Student(17, "Other", "o@x.com", 3);
+        assertTrue(a.equals(b) && a.hashCode() == b.hashCode(), "Students with same ID are equal by ID");
     }
 
     private static void testFindStudentNotFound() {
@@ -144,11 +182,36 @@ public class TestRunner {
         assertTrue(!r, "addCourseToStudent returns false for missing student");
     }
 
+    private static void testAddDuplicateCourseRejected() {
+        StudentManager mgr = new StudentManager();
+        mgr.addStudent(new Student(81, "DupCourse", "d@x.com", 2));
+        boolean first = mgr.addCourseToStudent(81, new Course(501, "History", "DrH"));
+        boolean second = mgr.addCourseToStudent(81, new Course(501, "History Again", "DrH2"));
+        assertTrue(first && !second, "Duplicate course ID for same student rejected");
+    }
+
     private static void testViewCoursesEmpty() {
         StudentManager mgr = new StudentManager();
         mgr.addStudent(new Student(80, "EmptyC", "e@x.com", 2));
         List<Course> courses = mgr.getCoursesOfStudent(80);
         assertTrue(courses != null && courses.isEmpty(), "getCoursesOfStudent returns empty list when no courses");
+    }
+
+    private static void testReadOnlyListProtection() {
+        Student student = new Student(90, "ReadOnly", "ro@x.com", 2);
+        boolean gradeFail = false;
+        try {
+            student.getGrades().add(10.0);
+        } catch (UnsupportedOperationException e) {
+            gradeFail = true;
+        }
+        boolean courseFail = false;
+        try {
+            student.getCourses().add(new Course(900, "Course", "Instr"));
+        } catch (UnsupportedOperationException e) {
+            courseFail = true;
+        }
+        assertTrue(gradeFail && courseFail, "Student grade/course lists are read-only from external access");
     }
 
     private static void testInteractionFlow() {

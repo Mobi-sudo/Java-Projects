@@ -1,6 +1,9 @@
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Main{
+    private static final Pattern VALID_EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
     public static void main(String[] args){
         Scanner scanner = new Scanner(System.in);
         StudentManager studentManager = new StudentManager();
@@ -23,15 +26,27 @@ public class Main{
                     int id = readInt(scanner, "Enter student ID: ");
                     System.out.print("Enter student name: ");
                     String name = scanner.nextLine();
+                    if (!isValidName(name)) {
+                        System.out.println("Invalid name. Name cannot be empty.");
+                        break;
+                    }
                     System.out.print("Enter student email: ");
                     String email = scanner.nextLine();
+                    if (!isValidEmail(email)) {
+                        System.out.println("Invalid email. Please include an '@' symbol.");
+                        break;
+                    }
                     int yearLevel = readInt(scanner, "Enter student year level: ");
+                    if (!isValidYearLevel(yearLevel)) {
+                        System.out.println("Invalid year level. Please enter a positive value.");
+                        break;
+                    }
                     Student student = new Student(id, name, email, yearLevel);
                     boolean added = studentManager.addStudent(student);
                     if (added) {
                         System.out.println("Student added successfully!");
                     } else {
-                        System.out.println("Student with ID " + id + " already exists.");
+                        System.out.println("Student not added. Check ID, duplicate record, or invalid input.");
                     }
                     break;
                 case 2:
@@ -148,5 +163,17 @@ public class Main{
                 System.out.println("Invalid input. Please enter a number.");
             }
         }
+    }
+
+    private static boolean isValidName(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+    private static boolean isValidEmail(String value) {
+        return value != null && !value.trim().isEmpty() && VALID_EMAIL_PATTERN.matcher(value.trim()).matches();
+    }
+
+    private static boolean isValidYearLevel(int value) {
+        return value > 0;
     }
 }
