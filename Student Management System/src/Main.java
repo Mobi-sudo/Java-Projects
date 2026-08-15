@@ -76,13 +76,29 @@ public class Main{
                     }
                     break;
                 case 5:
-                    int gradeId = readInt(scanner, "Enter student ID to add grade: ");
-                    double grade = readDouble(scanner, "Enter grade (0-100): ");
-                    boolean gradeAdded = studentManager.addGradeToStudent(gradeId, grade);
-                    if(gradeAdded){
-                        System.out.println("Grade added successfully.");
+                    int studentForGrade = readInt(scanner, "Enter student ID to add/update grade components: ");
+                    int courseForGrade = readInt(scanner, "Enter course ID to add/update grade components to: ");
+                    System.out.println("Which component to set? 1=Prelim, 2=Midterm, 3=Final");
+                    int comp = readInt(scanner, "Enter component number: ");
+                    double gradeVal = readDouble(scanner, "Enter grade (0-100): ");
+                    boolean gradeAdded2 = false;
+                    switch (comp) {
+                        case 1:
+                            gradeAdded2 = studentManager.setPrelimGrade(studentForGrade, courseForGrade, gradeVal);
+                            break;
+                        case 2:
+                            gradeAdded2 = studentManager.setMidtermGrade(studentForGrade, courseForGrade, gradeVal);
+                            break;
+                        case 3:
+                            gradeAdded2 = studentManager.setFinalExamGrade(studentForGrade, courseForGrade, gradeVal);
+                            break;
+                        default:
+                            System.out.println("Invalid component choice.");
+                    }
+                    if(gradeAdded2){
+                        System.out.println("Grade component updated successfully.");
                     } else {
-                        System.out.println("Student not found or invalid grade.");
+                        System.out.println("Student or course not found, or invalid grade.");
                     }
                     break;
                 case 6:
@@ -122,6 +138,10 @@ public class Main{
                             System.out.println("Course ID: " + c.getCourseId());
                             System.out.println("Course Name: " + c.getCourseName());
                             System.out.println("Instructor: " + c.getInstructor());
+                            System.out.println("Prelim: " + (c.getPrelim() == null ? "N/A" : c.getPrelim()));
+                            System.out.println("Midterm: " + (c.getMidterm() == null ? "N/A" : c.getMidterm()));
+                            System.out.println("Final: " + (c.getFinalExam() == null ? "N/A" : c.getFinalExam()));
+                            System.out.println("Course Final Grade: " + (c.getCourseFinalGrade() == null ? "N/A" : c.getCourseFinalGrade()));
                             System.out.println("----------------------------");
                         }
                     }

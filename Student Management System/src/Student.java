@@ -8,7 +8,6 @@ public class Student {
     private String name;
     private String email;
     private int yearLevel;
-    private List<Double> grades;
     private List<Course> courses;
 
     public Student(int id, String name, String email, int yearLevel){
@@ -16,7 +15,6 @@ public class Student {
         this.name = name;
         this.email = email;
         this.yearLevel = yearLevel;
-        this.grades = new ArrayList<>();
         this.courses = new ArrayList<>();
     }
     public int getId(){
@@ -35,16 +33,8 @@ public class Student {
         return yearLevel;
     }
 
-    public List<Double> getGrades() {
-        return Collections.unmodifiableList(grades);
-    }
-
     public List<Course> getCourses() {
         return Collections.unmodifiableList(courses);
-    }
-
-    public void addGrade(double grade) {
-        grades.add(grade);
     }
 
     public void addCourse(Course course) {

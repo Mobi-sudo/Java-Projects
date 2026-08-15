@@ -138,31 +138,46 @@ public class TestRunner {
     private static void testAddGradeToStudentNormal() {
         StudentManager mgr = new StudentManager();
         mgr.addStudent(new Student(40, "G1", "g1@x.com", 1));
-        boolean res = mgr.addGradeToStudent(40, 75.5);
-        assertTrue(res, "addGradeToStudent returns true for existing student");
+        // add a course first
+        mgr.addCourseToStudent(40, new Course(400, "Math", "DrM"));
+        // set all components so course final grade is computed
+        boolean r1 = mgr.setPrelimGrade(40, 400, 75.5);
+        boolean r2 = mgr.setMidtermGrade(40, 400, 75.5);
+        boolean r3 = mgr.setFinalExamGrade(40, 400, 75.5);
+        assertTrue(r1 && r2 && r3, "Setting all components returns true");
         OptionalDouble avg = mgr.calculateAverageGrade(40);
-        assertTrue(avg.isPresent() && Math.abs(avg.getAsDouble() - 75.5) < 1e-6, "calculateAverageGrade returns correct average after one grade");
+        assertTrue(avg.isPresent() && Math.abs(avg.getAsDouble() - 75.5) < 1e-6, "calculateAverageGrade returns correct average after one graded course");
     }
 
     private static void testAddGradeToStudentMissing() {
         StudentManager mgr = new StudentManager();
-        boolean res = mgr.addGradeToStudent(9998, 60.0);
-        assertTrue(!res, "addGradeToStudent returns false for missing student");
+        boolean res = mgr.setPrelimGrade(9998, 1, 60.0);
+        assertTrue(!res, "setPrelimGrade returns false for missing student");
     }
 
     private static void testCalculateAverageMultipleGrades() {
         StudentManager mgr = new StudentManager();
         mgr.addStudent(new Student(50, "Avg", "a@x.com", 2));
-        mgr.addGradeToStudent(50, 80.0);
-        mgr.addGradeToStudent(50, 90.0);
-        mgr.addGradeToStudent(50, 70.0);
+        mgr.addCourseToStudent(50, new Course(501, "C1", "I1"));
+        mgr.addCourseToStudent(50, new Course(502, "C2", "I2"));
+        mgr.addCourseToStudent(50, new Course(503, "C3", "I3"));
+        mgr.setPrelimGrade(50, 501, 80.0);
+        mgr.setMidtermGrade(50, 501, 80.0);
+        mgr.setFinalExamGrade(50, 501, 80.0);
+        mgr.setPrelimGrade(50, 502, 90.0);
+        mgr.setMidtermGrade(50, 502, 90.0);
+        mgr.setFinalExamGrade(50, 502, 90.0);
+        mgr.setPrelimGrade(50, 503, 70.0);
+        mgr.setMidtermGrade(50, 503, 70.0);
+        mgr.setFinalExamGrade(50, 503, 70.0);
         OptionalDouble avg = mgr.calculateAverageGrade(50);
-        assertTrue(avg.isPresent() && Math.abs(avg.getAsDouble() - 80.0) < 1e-6, "calculateAverageGrade correct for multiple grades");
+        assertTrue(avg.isPresent() && Math.abs(avg.getAsDouble() - 80.0) < 1e-6, "calculateAverageGrade correct for multiple graded courses");
     }
 
     private static void testCalculateAverageNoGrades() {
         StudentManager mgr = new StudentManager();
         mgr.addStudent(new Student(60, "NoG", "n@x.com", 1));
+        // student has no courses and therefore no grades
         OptionalDouble avg = mgr.calculateAverageGrade(60);
         assertTrue(!avg.isPresent(), "calculateAverageGrade returns empty when no grades available");
     }
@@ -199,26 +214,22 @@ public class TestRunner {
 
     private static void testReadOnlyListProtection() {
         Student student = new Student(90, "ReadOnly", "ro@x.com", 2);
-        boolean gradeFail = false;
-        try {
-            student.getGrades().add(10.0);
-        } catch (UnsupportedOperationException e) {
-            gradeFail = true;
-        }
         boolean courseFail = false;
         try {
             student.getCourses().add(new Course(900, "Course", "Instr"));
         } catch (UnsupportedOperationException e) {
             courseFail = true;
         }
-        assertTrue(gradeFail && courseFail, "Student grade/course lists are read-only from external access");
+        assertTrue(courseFail, "Student course list is read-only from external access");
     }
 
     private static void testInteractionFlow() {
         StudentManager mgr = new StudentManager();
         mgr.addStudent(new Student(90, "Flow", "f@x.com", 3));
-        mgr.addGradeToStudent(90, 88.0);
         mgr.addCourseToStudent(90, new Course(401, "Eng", "DrE"));
+        mgr.setPrelimGrade(90, 401, 88.0);
+        mgr.setMidtermGrade(90, 401, 88.0);
+        mgr.setFinalExamGrade(90, 401, 88.0);
 
         Student s = mgr.findStudent(90);
         assertTrue(s != null && s.getName().equals("Flow"), "Interaction: added student found");
