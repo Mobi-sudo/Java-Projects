@@ -41,6 +41,19 @@ public class Student {
         courses.add(course);
     }
 
+    // Setter helpers used by admin UI
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setYearLevel(int yearLevel) {
+        this.yearLevel = yearLevel;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

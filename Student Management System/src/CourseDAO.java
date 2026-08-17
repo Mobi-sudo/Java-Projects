@@ -66,4 +66,19 @@ public class CourseDAO {
             return out;
         }
     }
+
+    public boolean removeCourseFromStudent(int studentId, int courseId) {
+        Connection conn = DatabaseConnection.getConnection();
+        if (conn == null) return false;
+        String sql = "DELETE FROM enrollments WHERE student_id = ? AND course_id = ?";
+        try (Connection cn = conn; PreparedStatement ps = cn.prepareStatement(sql)){
+            ps.setInt(1, studentId);
+            ps.setInt(2, courseId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

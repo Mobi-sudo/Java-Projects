@@ -199,6 +199,54 @@ public class StudentManager {
         return Collections.emptyList();
     }
 
+    // Update student record (admin)
+    public boolean updateStudent(Student s) {
+        if (s == null) return false;
+        if (!isValidEmail(s.getEmail())) return false;
+        if (s.getYearLevel() <= 0) return false;
+        if (useDb) return studentDAO.updateStudent(s);
+        Student existing = findStudent(s.getId());
+        if (existing == null) return false;
+        existing.setName(s.getName());
+        existing.setEmail(s.getEmail());
+        existing.setYearLevel(s.getYearLevel());
+        return true;
+    }
+
+    // Ensure course master list contains the course
+    public boolean addCourseMaster(Course c) {
+        if (c == null) return false;
+        if (c.getCourseId() <= 0) return false;
+        if (useDb) return courseDAO.ensureCourseExists(c);
+        // In-memory: no global master list — treat as success
+        return true;
+    }
+
+    // Remove course enrollment for a student
+    public boolean removeCourseFromStudent(int studentId, int courseId) {
+        if (useDb) return courseDAO.removeCourseFromStudent(studentId, courseId);
+        Student s = findStudent(studentId);
+        if (s == null) return false;
+        List<Course> list = new ArrayList<>(s.getCourses());
+        for (Course c : list) {
+            if (c.getCourseId() == courseId) {
+                // need to remove via internal courses list — Student doesn't expose remove so recreate
+                try {
+                    java.lang.reflect.Field f = Student.class.getDeclaredField("courses");
+                    f.setAccessible(true);
+                    @SuppressWarnings("unchecked")
+                    List<Course> internal = (List<Course>) f.get(s);
+                    internal.remove(c);
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
     private static boolean isValidEmail(String email) {
         return email != null && !email.trim().isEmpty() && VALID_EMAIL_PATTERN.matcher(email.trim()).matches();
     }

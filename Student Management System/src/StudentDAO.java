@@ -89,6 +89,23 @@ public class StudentDAO {
         return out;
     }
 
+    public boolean updateStudent(Student s) {
+        Connection conn = DatabaseConnection.getConnection();
+        if (conn == null) return false;
+        String sql = "UPDATE students SET name = ?, email = ?, year_level = ? WHERE id = ?";
+        try (Connection c = conn; PreparedStatement ps = c.prepareStatement(sql)){
+            ps.setString(1, s.getName());
+            ps.setString(2, s.getEmail());
+            ps.setInt(3, s.getYearLevel());
+            ps.setInt(4, s.getId());
+            int rows = ps.executeUpdate();
+            return rows == 1;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean emailExists(String email){
         Connection conn = DatabaseConnection.getConnection();
         if (conn == null) return false;
