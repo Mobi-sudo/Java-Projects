@@ -17,12 +17,17 @@ public class User {
     }
 
     public User(int id, String name, String email, String passwordHash, UserRole role, LocalDateTime createdAt) {
+        this(id, name, email, passwordHash, role, AccountStatus.ACTIVE, createdAt);
+    }
+
+    public User(int id, String name, String email, String passwordHash, UserRole role,
+                AccountStatus status, LocalDateTime createdAt) {
         setId(id);
         setName(name);
         setEmail(email);
         setPasswordHash(passwordHash);
         setRole(role);
-        this.status = AccountStatus.ACTIVE;
+        setStatus(status);
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
 
